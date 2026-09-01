@@ -4,7 +4,7 @@ import enum
 
 import sqlalchemy
 
-from database import Base
+from app.database import Base
 
 from sqlalchemy import Column, String, Integer, DateTime, Enum
 
@@ -21,7 +21,7 @@ class Order(Base):
     id = Column(postgresql.UUID(as_uuid=True), default=uuid.uuid4, primary_key=True)
     item = Column(String)
     quantity = Column(Integer)
-    status = Column(Enum(OrderStatus))
+    status = Column(Enum(OrderStatus), default=OrderStatus.PENDING)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 

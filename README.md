@@ -41,7 +41,7 @@ curl http://localhost:8003/health
 ## Roadmap
 
 - [x] Week 1 — scaffolding, Docker Compose, health checks
-- [ ] Week 2 — orders-service core CRUD (Postgres-backed)
+- [x] Week 2 — orders-service core CRUD (Postgres-backed)
 - [ ] Week 3 — inventory-service + synchronous integration
 - [ ] Week 4 — async messaging via Redis Streams + notification-service
 - [ ] Week 5 — idempotency keys + retry/circuit-breaker handling

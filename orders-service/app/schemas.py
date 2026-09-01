@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 import uuid
 from datetime import datetime
 from app.models import OrderStatus
@@ -10,6 +10,7 @@ class OrderCreate(BaseModel):
     quantity: int = Field(..., gt=0)
 
 class OrderRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
     id: uuid.UUID
     item: str
     quantity: int
@@ -17,6 +18,3 @@ class OrderRead(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        # allows pydantic to read attributes from SQLAlchemy object instead of just treating it as a dict
-        from_attributes = True

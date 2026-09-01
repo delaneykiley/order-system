@@ -7,14 +7,17 @@ from app.database import Base, engine, get_db
 from app.models import Order
 from app.schemas import OrderCreate, OrderRead
 
-app = FastAPI(title="orders-service")
+from contextlib import asynccontextmanager
+
 
 # startup hook
-@app.on_event("startup")
-def on_startup():
-    # checks the db for every model class that inherits from Base and
-    # creates any table that doesn't exist yet based on the model's column definitions
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     Base.metadata.create_all(bind=engine)
+    yield
+
+app = FastAPI(title="orders-service", lifespan=lifespan)
+
 
 # health check
 @app.get("/health")

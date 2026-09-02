@@ -8,4 +8,3 @@ def health():
     return {"status": "ok", "service": "inventory-service"}
 
 
-# TODO (Week 3): stock levels, reserve/release endpoints

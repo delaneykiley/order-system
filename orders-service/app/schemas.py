@@ -17,4 +17,3 @@ class OrderRead(BaseModel):
     status: OrderStatus
     created_at: datetime
     updated_at: datetime
-

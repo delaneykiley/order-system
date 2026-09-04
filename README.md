@@ -12,17 +12,15 @@ and cross-service observability.
 | `inventory-service` | 8002 | Tracks stock, reserves/releases inventory |
 | `notification-service` | 8003 | Sends order confirmations (async, event-driven) |
 
-## Architecture (planned)
+## Architecture
 
 - `orders-service` → `inventory-service`: **synchronous REST** call to check/reserve stock
-  at order time.
+  at order time: when an order is created, orders-service calls inventory-service to check whether stock is available. If response status code is 200, then the order is committed to the database with status 'confirmed'. Otherwise, the order is committed to the database with status 'failed' (this preserves a record of what was attempted, at the cost of the client needing to check the order's status separately from the HTTP response code). (IMPLEMENTED)
 - `orders-service` → `notification-service`: **asynchronous**, via a Redis Streams event
-  (`order.confirmed`) — notification-service consumes it independently.
+  (`order.confirmed`) — notification-service consumes it independently. (PLANNED)
 - Each request carries a correlation ID that's logged across all three services, so a
-  single order can be traced end-to-end.
+  single order can be traced end-to-end. (PLANNED)
 
-_This section will be filled in with real design decisions and tradeoffs as the system
-is built out — see the roadmap below._
 
 ## Running locally
 
@@ -42,7 +40,7 @@ curl http://localhost:8003/health
 
 - [x] Week 1 — scaffolding, Docker Compose, health checks
 - [x] Week 2 — orders-service core CRUD (Postgres-backed)
-- [ ] Week 3 — inventory-service + synchronous integration
+- [x] Week 3 — inventory-service + synchronous integration
 - [ ] Week 4 — async messaging via Redis Streams + notification-service
 - [ ] Week 5 — idempotency keys + retry/circuit-breaker handling
 - [ ] Week 6 — structured logging with correlation IDs across services

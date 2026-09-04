@@ -4,6 +4,7 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 
 # create engine with ping flag (to automatically test and repair stale database connections before use)
 db_url = os.environ.get("DATABASE_URL", "postgresql://app:app@localhost:5432/orders")
+
 engine = create_engine(db_url, pool_pre_ping=True)
 
 # create session factory

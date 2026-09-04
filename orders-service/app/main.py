@@ -4,11 +4,16 @@ from sqlalchemy.orm import Session
 import uuid
 
 from app.database import Base, engine, get_db
-from app.models import Order
+from app.models import Order, OrderStatus
 from app.schemas import OrderCreate, OrderRead
 
 from contextlib import asynccontextmanager
 
+import httpx
+
+import os
+
+INVENTORY_SERVICE_URL = os.environ.get("INVENTORY_SERVICE_URL", "http://localhost:8002")
 
 # startup hook
 @asynccontextmanager
@@ -29,9 +34,28 @@ def health():
 @app.post("/orders", response_model=OrderRead, status_code=201)
 def create_order(order_in: OrderCreate, db: Session = Depends(get_db)):
     order = Order(item=order_in.item, quantity=order_in.quantity)
+
+    # call to inventory-service to check stock and update order status accordingly
+    try:
+        response = httpx.post(
+            f"{INVENTORY_SERVICE_URL}/inventory/{order_in.item}/reserve",
+            json={"quantity": order_in.quantity},
+        )
+    except httpx.RequestError:
+        raise HTTPException(status_code=404, detail="Cannot connect to inventory-service")
+
+    if response.status_code == 200:
+        order.status = OrderStatus.CONFIRMED
+    else:
+        order.status = OrderStatus.FAILED
+
     db.add(order)       # stages order for insertion
     db.commit()         # executes the INSERT and commits transaction
     db.refresh(order)   # re-queries row from db and updates attributes to match what's actually stored
+
+    if response.status_code != 200:
+        raise HTTPException(status_code=409, detail="Stock does not exist")
+
     return order
 
 @app.get("/orders/{order_id}", response_model=OrderRead)
